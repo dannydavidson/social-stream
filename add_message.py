@@ -1,9 +1,25 @@
-import sys, os, pymongo, datetime
+import sys, zmq, os, datetime
+import zmq.ssh as ssh
 
-message = {}
-message['name'] = sys.argv[1]
-message['text'] = sys.argv[2]
-message['posted'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-c = pymongo.MongoReplicaSetClient('localhost:3001', replicaSet='meteor')
-c.meteor.messages.insert(message)
+msg = {}
+msg['name'] = sys.argv[1]
+msg['text'] = sys.argv[2]
+msg['posted'] = datetime.datetime.now().strftime('%m/%d/%Y @ %H:%M')
+
+# define sockets
+ctx = zmq.Context()
+channel = ctx.socket(zmq.REQ)
+
+# tunnel connections using ssh
+ssh.tunnel_connection(channel,
+                      "tcp://127.0.0.1:3003",
+                      "root@d")
+
+channel.send_json(msg)
+
+while True:
+	print(channel.recv())
+	break
+
+
 
