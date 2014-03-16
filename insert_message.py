@@ -12,7 +12,7 @@ while True:
 		objId = c.meteor.messages.insert(msg)
 		channel.send_json({
 			'status': 'SUCCESS',
-			'id': objId
+			'id': str(objId)
 		})
 	except Exception as e:
 		print(e)
