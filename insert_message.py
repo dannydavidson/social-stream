@@ -15,6 +15,7 @@ while True:
 			'id': objId
 		})
 	except Exception as e:
+		print(e)
 		channel.send_json({
 			'status': 'FAIL'
 		})
