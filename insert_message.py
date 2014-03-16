@@ -16,7 +16,6 @@ while True:
 		})
 	except Exception as e:
 		channel.send_json({
-			'status': 'FAIL',
-			'msg': e
+			'status': 'FAIL'
 		})
 
