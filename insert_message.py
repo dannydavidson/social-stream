@@ -8,7 +8,7 @@ channel.bind('tcp://127.0.0.1:3003')
 
 while True:
 	try:
-		msg = channel.recv()
+		msg = channel.recv_json()
 		objId = c.meteor.messages.insert(msg)
 		channel.send_json({
 			'status': 'SUCCESS',
