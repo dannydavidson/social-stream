@@ -6,9 +6,68 @@
 }
 
 .message {
+	margin: 5px;
 	text-align: center;
+	position: relative;
+	background: lightgray;
+
+	&.selected {
+		background: black;
+		color: white;
+	}
+
+	.text {
+		padding: 10px;
+		font-size: 32px;
+		line-height: 36px;
+		display: block;
+		padding-bottom: 30px;
+	}
+
+	.time {
+		font-size: 16px;
+		display: block;
+		position: absolute;
+		right: 10px;
+		bottom: 5px;
+	}
+
+	.name {
+		font-size: 16px;
+		display: block;
+		position: absolute;
+		left: 10px;
+		bottom: 5px;
+	}
 }
 
-.selected {
-	color: blue;
+.button {
+	text-align: center;
+	background: grey;
+	color: black;
+	padding: 15px;
+	cursor: pointer;
+	border-right: 1px solid black;
+
+	&.selected {
+		background: black;
+		color: white;
+	}
+
+	&:last-child {
+		border-right: none;
+	}
 }
+
+.select-media {
+	position: fixed;
+	display: flex;
+	bottom: 0;
+	left: 0;
+	right: 0;
+
+	.button {
+		flex: 1;
+	}
+}
+

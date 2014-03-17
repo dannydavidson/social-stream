@@ -83,7 +83,7 @@ if ( Meteor.isClient ) {
 		render: function () {
 			return this.transferPropsTo(
 				<div className="message">
-					<span className="message">{this.props.text}</span>
+					<span className="text">{this.props.text}</span>
 					<span className="time">{this.props.posted}</span>
 					<span className="name">{this.props.name}</span>
 				</div>
@@ -162,10 +162,8 @@ if ( Meteor.isClient ) {
 
 		});
 
-		Meteor.autorun(function () {
-			Meteor.subscribe('media', function () {
-				React.renderComponent( <SelectMedia />, $('.controls')[0] );
-			});
+		Meteor.subscribe('media', function () {
+			React.renderComponent( <SelectMedia />, $('.controls')[0] );
 		});
 
 	} );
