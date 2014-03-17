@@ -104,8 +104,7 @@ if ( Meteor.isClient ) {
 			return {
 				messages: db.messages.find( {}, {
 					sort: {
-						posted: -1,
-						name: 1
+						posted: -1
 					}
 				} ).fetch( ),
 				selected: selected
