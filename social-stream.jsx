@@ -188,7 +188,7 @@ if ( Meteor.isServer ) {
 
 		Meteor.publish( 'stream', function ( mediaIds ) {
 			var sort = {
-					posted: 1
+					posted: -1
 				};
 
 			if ( _(mediaIds).isArray() && mediaIds.length ) {
