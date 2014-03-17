@@ -3,7 +3,8 @@ import zmq.ssh as ssh
 
 msg = {}
 msg['name'] = sys.argv[1]
-msg['text'] = sys.argv[2]
+msg['media'] = sys.argv[2]
+msg['text'] = sys.argv[3]
 msg['posted'] = datetime.datetime.now().strftime('%m/%d/%Y @ %H:%M')
 
 # define sockets
@@ -16,10 +17,7 @@ ssh.tunnel_connection(channel,
                       "root@d")
 
 channel.send_json(msg)
-
-while True:
-	print(channel.recv())
-	break
+print(channel.recv())
 
 
 

@@ -1,11 +1,83 @@
 /** @jsx React.DOM */
 
 db = {};
+db.media = new Meteor.Collection('media');
 db.messages = new Meteor.Collection( 'messages' );
+
+var toIds = function (obj) {
+	return obj._id;
+}
 
 if ( Meteor.isClient ) {
 
-	// Message component
+	var ToggleButton = React.createClass({
+
+		render: function () {
+			return this.transferPropsTo(
+				<div className="button">
+					{this.props.text}
+				</div>
+			);
+		}
+
+	});
+
+	var SelectMedia = React.createClass({
+
+		// start prototype code
+
+		mixins: [ ReactMeteor.Mixin ],
+
+		getMeteorState: function () {
+			var selected = _( db.media.find( { _id: { $in: Session.get( 'media.selected' ) } } ).fetch() ).map( toIds );
+
+			return {
+				media: db.media.find({}).fetch() || [],
+				selected: selected
+			}
+		},
+
+		changes: {
+			media: {
+				selected: function (id) {
+					var selected = Session.get( 'media.selected' );
+					if ( _( selected ).contains( id ) ) {
+						Session.set('media.selected', _(selected).without(id));
+					} else {
+						Session.set( 'media.selected', _( selected ).union([id] ) );
+					}
+				}
+			}
+		},
+
+		// end prototype code
+
+		toggleButton: function (id) {
+			this.change( 'media.selected', id );
+		},
+
+		renderButton: function ( model ) {
+			var isSelected = _( this.state.selected ).contains( model._id );
+			return (
+				<ToggleButton
+					key={model._id}
+					text={model.name}
+					className={isSelected ? "selected" : ""}
+					onClick={this.toggleButton.bind( this, model._id )}
+				/>
+			);
+		},
+
+		render: function () {
+			return (
+				<div className="select-media">
+					{_(this.state.media).map(this.renderButton)}
+				</div>
+			);
+		}
+
+	});
+
 	var Message = React.createClass({
 
 		render: function () {
@@ -20,14 +92,15 @@ if ( Meteor.isClient ) {
 
 	});
 
-	// Messages compontent, defines behavior for Message compontents
-	// contained within
+	// Messages compontent
 	var Messages = React.createClass( {
+
+		// start prototype code
 
 		mixins: [ ReactMeteor.Mixin ],
 
 		getMeteorState: function ( ) {
-			var selected = db.messages.findOne( Session.get( 'selectedMessage' ) );
+			var selected = db.messages.findOne( Session.get( 'messages.selected' ) );
 			return {
 				messages: db.messages.find( {}, {
 					sort: {
@@ -42,10 +115,12 @@ if ( Meteor.isClient ) {
 		changes: {
 			messages: {
 				selected: function (id) {
-					Session.set('selectedMessage', id);
+					Session.set('messages.selected', id);
 				}
 			}
 		},
+
+		// end prototype code
 
 		selectMessage: function (id) {
 			this.change('messages.selected', id);
@@ -53,12 +128,13 @@ if ( Meteor.isClient ) {
 
 		renderMessage: function ( model ) {
 			var _id = this.state.selected && this.state.selected._id;
+			isSelected = _(model._id).isString() ? model._id === _id : model._id.equals(_id);
 			return (
 				<Message key={model._id}
 						 name={model.name}
 						 posted={model.posted}
 						 text={model.text}
-						 className={model._id.equals(_id) ? "selected" : ""}
+						 className={isSelected ? "selected" : ""}
 						 onClick={this.selectMessage.bind( this, model._id )} />
 			)
 		},
@@ -74,9 +150,24 @@ if ( Meteor.isClient ) {
 	});
 
 	Meteor.startup( function ( ) {
-		Meteor.subscribe( 'stream', function ( ) {
-			React.renderComponent( <Messages />, document.body );
-		} );
+
+		Session.set( 'media.selected', []);
+
+		Meteor.autorun(function () {
+
+			var mediaIds = Session.get('media.selected');
+			Meteor.subscribe( 'stream', mediaIds, function ( ) {
+				React.renderComponent( <Messages />, $('.main')[0] );
+			} );
+
+		});
+
+		Meteor.autorun(function () {
+			Meteor.subscribe('media', function () {
+				React.renderComponent( <SelectMedia />, $('.controls')[0] );
+			});
+		});
+
 	} );
 
 }
@@ -90,12 +181,29 @@ if ( Meteor.isServer ) {
 	})
 
 	Meteor.startup( function ( ) {
-		Meteor.publish( 'stream', function ( ) {
-			return db.messages.find( {}, {
-				sort: {
+
+		if (db.media.find({}).count() === 0) {
+			db.media.insert({name: 'facebook'});
+			db.media.insert({name: 'twitter'});
+			db.media.insert({name: 'google'});
+		}
+
+		Meteor.publish( 'stream', function ( mediaIds ) {
+			var sort = {
 					posted: 1
-				}
-			} );
+				};
+
+			if ( _(mediaIds).isArray() && mediaIds.length ) {
+				return db.messages.find( { media: { $in: mediaIds } },
+										 { sort: sort } );
+			}
+
+			return db.messages.find({}, { sort: sort } );
+
+		} );
+
+		Meteor.publish( 'media', function () {
+			return db.media.find({});
 		} );
 	} );
 }
