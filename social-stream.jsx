@@ -150,6 +150,9 @@ if ( Meteor.isClient ) {
 
 	Meteor.startup( function ( ) {
 
+		// set up fast click
+		FastClick.attach( document.body );
+
 		Session.set( 'media.selected', []);
 
 		Meteor.autorun(function () {
