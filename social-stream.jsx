@@ -104,7 +104,7 @@ if ( Meteor.isClient ) {
 			return {
 				messages: db.messages.find( {}, {
 					sort: {
-						posted: 1,
+						posted: -1,
 						name: 1
 					}
 				} ).fetch( ),
@@ -187,16 +187,12 @@ if ( Meteor.isServer ) {
 		}
 
 		Meteor.publish( 'stream', function ( mediaIds ) {
-			var sort = {
-					posted: 1
-				};
 
 			if ( _(mediaIds).isArray() && mediaIds.length ) {
-				return db.messages.find( { media: { $in: mediaIds } },
-										 { sort: sort } );
+				return db.messages.find( { media: { $in: mediaIds } });
 			}
 
-			return db.messages.find({}, { sort: sort } );
+			return db.messages.find({});
 
 		} );
 
